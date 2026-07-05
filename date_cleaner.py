@@ -3,22 +3,24 @@ date_cleaner.py
 ===============
 
 Nettoyage et normalisation de dates "sales" (formats hétérogènes) vers un
-type datetime exploitable, à partir d'une colonne pandas.
+type datetime exploitable, à partir d'une colonne pandas (Serie).
 
 Idée directrice
 ---------------
-Plutôt que d'identifier à l'oeil tous les formats possibles puis d'écrire une
-regex géante, on procède par passes successives :
+Plutôt que d'identifier à l'oeil tous les formats possibles et écrire une
+regex géante, je procède par passes successives :
 
-    1. On tente un parsing générique sur tout ce qui reste à traiter.
-       Ce qui est reconnu est rangé dans le résultat, à sa place (index aligné).
-    2. On isole UNIQUEMENT les valeurs qui ont échoué.
-    3. On applique un nettoyage ciblé (regex) sur ces échecs pour les rapprocher
+    1. Tenter un parsing générique sur tout ce qui reste à traiter.
+       Ce qui est reconnu est rangé dans le résultat, à la bonne place 
+       (index aligné).
+    2. Isoler UNIQUEMENT les valeurs qui ont échoué.
+    3. Appliquer un nettoyage ciblé (regex) sur ces échecs pour les rapprocher
        d'un format reconnaissable.
-    4. On recommence (retour à l'étape 1) sur les échecs nettoyés.
+    4. Recommencer ce processus en 3 étapes sur les échecs nettoyés jusqu'à 
+       ce que toutes les dates soient reconnues en 'datetime' par le pareur.
 
-On s'arrête quand il ne reste plus que des valeurs réellement invalides
-(vraies valeurs manquantes ou dates impossibles), qui restent à NaT.
+S'arrêter lorsqu'il ne reste plus que des valeurs réellement invalides
+(vraies valeurs manquantes ou dates impossibles) qui doivent rester à NaT.
 
 Cette approche "débroussailler d'abord, raffiner ensuite" évite de sur-spécifier
 des regex fragiles et concentre l'effort de nettoyage là où c'est nécessaire.
@@ -48,21 +50,21 @@ _MOIS_PATTERN = (
 
 def _parser(series: pd.Series, dayfirst: bool) -> pd.Series:
     """
-    Tente de convertir chaque valeur en date, élément par élément.
+    Tente de convertir chaque valeur en date (type datetime)
+    élément par élément.
 
-    Pourquoi élément par élément et pas en une seule passe vectorisée ?
-    Parce qu'une colonne sale mélange des formats différents d'une ligne à
-    l'autre (ISO, mois en lettres, jour/mois inversés...). Les versions
+    Une colonne sale mélange des formats différents d'une ligne à
+    l'autre (ISO, mois en lettres, jour/mois inversés...). Or les versions
     récentes de pandas refusent d'inférer un format global sur un mélange
-    hétérogène. En parsant chaque valeur indépendamment, chacune peut suivre
+    hétérogène. Donc en parsant chaque valeur indépendamment, chacune peut suivre
     son propre format. Ce qui échoue devient NaT, sans bloquer les autres.
 
     Subtilité importante sur `dayfirst` : ce paramètre ne tranche QUE
     l'ambiguïté entre le jour et le mois. Il ne doit pas s'appliquer quand
     l'année est déjà identifiable en tête (4 chiffres au début, ex. "2005/12/4"
     = année/mois/jour). Sinon "2005/12/4" serait lu comme le 12 du mois 4.
-    On détecte donc l'année en tête et on force l'ordre année-mois-jour
-    dans ce cas.
+    On détecte donc l'année en tête dans ce cas on force l'ordre année-mois-jour
+    .
     """
     annee_en_tete = re.compile(r"^\s*\d{4}\D")
 
@@ -77,7 +79,7 @@ def _parser(series: pd.Series, dayfirst: bool) -> pd.Series:
 
 def _ranger_succes(resultat: pd.Series, parses: pd.Series) -> pd.Series:
     """
-    Range dans `resultat` les dates fraîchement parsées, uniquement aux endroits
+    Range dans `resultat` les dates nouvellement parsées, uniquement aux endroits
     encore vides (NaT). On ne remplace jamais une date déjà trouvée.
 
     `resultat` et `parses` partagent le même index : chaque ligne d'entrée
