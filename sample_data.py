@@ -2,12 +2,12 @@
 sample_data.py
 ==============
 
-Jeu de dates "sales" synthétique, inclus directement dans le dépôt pour que la
-démonstration et les tests tournent sans aucun fichier externe.
+Jeu de dates "sales" synthétique, inclus directement dans le dépôt vous permettant
+de lancer la démonstration et les tests sans aucun fichier externe.
 
 On y trouve volontairement une grande variété de formats rencontrés dans des
-données réelles, recensés à partir d'un vrai jeu de données de niveau Master 2
-(`dirty_dates_master2_level.csv`, 362 lignes, également fourni dans le dépôt) :
+données réelles, recensés à partir d'un vrai jeu de données du monde professionnel
+(`dirty_dates_master2_level.csv` de 362 lignes, également fourni dans le dépôt) :
 formats ISO, européens/américains, mois en lettres, suffixes ordinaux,
 séparateurs multiples, étiquettes textuelles, composantes horaires, fuseaux,
 ponctuation parasite, ainsi que de vraies valeurs invalides ou manquantes.
@@ -76,4 +76,3 @@ def charger_csv_reel():
     """
     chemin = os.path.join(os.path.dirname(__file__), "dirty_dates_master2_level.csv")
     return pd.read_csv(chemin)["raw_date"]
-
