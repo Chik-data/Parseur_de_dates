@@ -3,10 +3,10 @@ test_date_cleaner.py
 ====================
 
 Tests du parseur. Exécutables de deux façons :
-    pytest                 (si pytest est installé)
-    python test_date_cleaner.py   (lanceur intégré, sans dépendance)
+    pytest (si pytest est installé)
+    python test_date_cleaner.py (lanceur intégré, sans dépendance)
 
-Chaque test documente un comportement attendu : c'est aussi une forme de
+Chaque test documente un comportement attendu comme une forme de
 spécification lisible de ce que le parseur garantit.
 """
 
@@ -98,7 +98,7 @@ def test_type_de_sortie():
 
 
 def test_etiquettes_textuelles():
-    """Préfixes d'étiquette variés : Date:, logged:, created on, approx, [crochets]."""
+    """Préfixes variés : Date:, logged:, created on, approx, [crochets]."""
     out = clean_dates(pd.Series([
         "Date:2023-01-01", "logged:2020-2-23", "created on 1996/01/21",
         "approx 2018-10-28", "update[2005/12/4]",
@@ -111,7 +111,7 @@ def test_etiquettes_textuelles():
 
 
 def test_composante_horaire_et_fuseaux():
-    """L'heure et le fuseau sont retirés ; seule la date est conservée."""
+    """L'heure et le fuseau sont retirés donc seule la date est conservée."""
     out = clean_dates(pd.Series([
         "2018-07-22T12:45:00 TEXT", "2010-1-10 00:00:00 random",
         "2013/12/08Z", "2010-03-14+02:00",
@@ -149,8 +149,8 @@ def test_dates_impossibles_restent_nat():
 
 def test_sur_vrai_jeu_de_donnees():
     """
-    Sur le vrai fichier fourni : on exige un taux de reconnaissance élevé ET
-    surtout aucune fausse date (les valeurs non datables doivent rester NaT).
+    Sur le vrai fichier fourni : j'exige un taux de reconnaissance élevé et
+    surtout aucune fausse date où les valeurs non datables doivent rester NaT.
     """
     from sample_data import charger_csv_reel
     s = charger_csv_reel()
